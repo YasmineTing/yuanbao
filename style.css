@@ -1,0 +1,48 @@
+:root {
+  color-scheme: dark;
+  --cell-size: 30px;
+  --grid-line: rgba(255, 255, 255, 0.08);
+  --cell-off: #0a0a0a;
+  --cell-on: #00ff95;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #000;
+  color: #fff;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.grid {
+  display: grid;
+  gap: 0;
+  background: var(--grid-line);
+  box-shadow: 0 0 0 1px var(--grid-line);
+  touch-action: manipulation;
+}
+
+.cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
+  background: var(--cell-off);
+  border: 1px solid var(--grid-line);
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.cell.is-alive {
+  background: var(--cell-on);
+}
