@@ -8,6 +8,17 @@
   </head>
   <body>
     <main class="app">
+      <section class="panel">
+        <header class="panel__header">
+          <h1>元胞自动机</h1>
+          <p>点击方格点亮/取消，使用控制按钮运行 Conway 规则。</p>
+        </header>
+        <div class="controls" role="group" aria-label="控制元胞自动机">
+          <button type="button" id="toggle-run" class="btn">开始</button>
+          <button type="button" id="step" class="btn">单步</button>
+          <button type="button" id="clear" class="btn btn--ghost">清空</button>
+        </div>
+      </section>
       <div class="grid" id="grid" aria-label="元胞网格"></div>
     </main>
     <script src="script.js"></script>
