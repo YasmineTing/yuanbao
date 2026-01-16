@@ -5,12 +5,11 @@ const clearButton = document.getElementById("clear");
 const sizeSelect = document.getElementById("size");
 const speedSelect = document.getElementById("speed");
 
-const CELL_SIZE = 30;
 const PADDING = 64;
-const SIZE_SCALE = {
-  small: 0.55,
-  medium: 0.75,
-  large: 0.95,
+const SIZE_CONFIG = {
+  small: { columns: 40, rows: 40 },
+  medium: { columns: 70, rows: 70 },
+  large: { columns: 100, rows: 100 },
 };
 const SPEED_MS = {
   slow: 450,
@@ -30,15 +29,20 @@ let currentTick = SPEED_MS.medium;
 const createEmptyState = (count) => Array.from({ length: count }, () => 0);
 
 const buildGrid = () => {
-  const scale = SIZE_SCALE[sizeSelect.value] ?? SIZE_SCALE.medium;
-  const availableWidth = (window.innerWidth - PADDING) * scale;
-  const availableHeight = (window.innerHeight - PADDING - 140) * scale;
+  const availableWidth = window.innerWidth - PADDING;
+  const availableHeight = window.innerHeight - PADDING - 180;
+  const config = SIZE_CONFIG[sizeSelect.value] ?? SIZE_CONFIG.medium;
 
-  columns = Math.max(1, Math.floor(availableWidth / CELL_SIZE));
-  rows = Math.max(1, Math.floor(availableHeight / CELL_SIZE));
+  columns = config.columns;
+  rows = config.rows;
+  const cellSize = Math.max(
+    6,
+    Math.floor(Math.min(availableWidth / columns, availableHeight / rows)),
+  );
 
-  gridElement.style.gridTemplateColumns = `repeat(${columns}, ${CELL_SIZE}px)`;
-  gridElement.style.gridTemplateRows = `repeat(${rows}, ${CELL_SIZE}px)`;
+  gridElement.style.setProperty("--cell-size", `${cellSize}px`);
+  gridElement.style.gridTemplateColumns = `repeat(${columns}, ${cellSize}px)`;
+  gridElement.style.gridTemplateRows = `repeat(${rows}, ${cellSize}px)`;
 
   gridElement.innerHTML = "";
   cells = createEmptyState(columns * rows);
@@ -50,13 +54,6 @@ const buildGrid = () => {
     cell.className = "cell";
     cell.dataset.index = String(index);
     cell.setAttribute("aria-pressed", "false");
-    cell.addEventListener("click", () => {
-      const current = cells[index];
-      const next = current === 1 ? 0 : 1;
-      cells[index] = next;
-      cell.classList.toggle("is-alive", next === 1);
-      cell.setAttribute("aria-pressed", String(next === 1));
-    });
     fragment.appendChild(cell);
   }
 
