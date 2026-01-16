@@ -61,6 +61,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+  align-items: center;
 }
 
 .btn {
@@ -78,6 +79,25 @@ body {
   background: transparent;
   color: #fff;
   border: 1px solid var(--panel-border);
+}
+
+.select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.select select {
+  appearance: none;
+  background: #101010;
+  color: #fff;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 6px 26px 6px 10px;
+  font-size: 14px;
+  position: relative;
 }
 
 .grid {

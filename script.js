@@ -2,22 +2,37 @@ const gridElement = document.getElementById("grid");
 const toggleRunButton = document.getElementById("toggle-run");
 const stepButton = document.getElementById("step");
 const clearButton = document.getElementById("clear");
+const sizeSelect = document.getElementById("size");
+const speedSelect = document.getElementById("speed");
 
 const CELL_SIZE = 30;
 const PADDING = 64;
-const TICK_MS = 200;
+const SIZE_SCALE = {
+  small: 0.55,
+  medium: 0.75,
+  large: 0.95,
+};
+const SPEED_MS = {
+  slow: 450,
+  medium: 250,
+  fast: 120,
+};
 
 let columns = 0;
 let rows = 0;
 let cells = [];
 let isRunning = false;
 let timerId = null;
+let isDrawing = false;
+let drawMode = 1;
+let currentTick = SPEED_MS.medium;
 
 const createEmptyState = (count) => Array.from({ length: count }, () => 0);
 
 const buildGrid = () => {
-  const availableWidth = window.innerWidth - PADDING;
-  const availableHeight = window.innerHeight - PADDING - 140;
+  const scale = SIZE_SCALE[sizeSelect.value] ?? SIZE_SCALE.medium;
+  const availableWidth = (window.innerWidth - PADDING) * scale;
+  const availableHeight = (window.innerHeight - PADDING - 140) * scale;
 
   columns = Math.max(1, Math.floor(availableWidth / CELL_SIZE));
   rows = Math.max(1, Math.floor(availableHeight / CELL_SIZE));
@@ -101,12 +116,24 @@ const renderState = () => {
   });
 };
 
+const updateCell = (index, nextValue) => {
+  if (index < 0 || index >= cells.length) {
+    return;
+  }
+  cells[index] = nextValue;
+  const cell = gridElement.querySelector(`.cell[data-index="${index}"]`);
+  if (cell) {
+    cell.classList.toggle("is-alive", nextValue === 1);
+    cell.setAttribute("aria-pressed", String(nextValue === 1));
+  }
+};
+
 const setRunning = (nextRunning) => {
   isRunning = nextRunning;
   toggleRunButton.textContent = isRunning ? "暂停" : "开始";
 
   if (isRunning) {
-    timerId = window.setInterval(applyRules, TICK_MS);
+    timerId = window.setInterval(applyRules, currentTick);
   } else if (timerId) {
     window.clearInterval(timerId);
     timerId = null;
@@ -135,6 +162,57 @@ clearButton.addEventListener("click", () => {
   clearGrid();
 });
 
+sizeSelect.addEventListener("change", () => {
+  buildGrid();
+  if (isRunning) {
+    setRunning(false);
+  }
+});
+
+speedSelect.addEventListener("change", () => {
+  currentTick = SPEED_MS[speedSelect.value] ?? SPEED_MS.medium;
+  if (isRunning) {
+    setRunning(false);
+    setRunning(true);
+  }
+});
+
+gridElement.addEventListener("contextmenu", (event) => {
+  event.preventDefault();
+});
+
+gridElement.addEventListener("pointerdown", (event) => {
+  if (!(event.target instanceof HTMLElement)) {
+    return;
+  }
+  const indexValue = event.target.dataset.index;
+  if (!indexValue) {
+    return;
+  }
+  const index = Number(indexValue);
+  drawMode = event.button === 2 ? 0 : 1;
+  isDrawing = true;
+  updateCell(index, drawMode);
+});
+
+gridElement.addEventListener("pointerover", (event) => {
+  if (!isDrawing) {
+    return;
+  }
+  if (!(event.target instanceof HTMLElement)) {
+    return;
+  }
+  const indexValue = event.target.dataset.index;
+  if (!indexValue) {
+    return;
+  }
+  updateCell(Number(indexValue), drawMode);
+});
+
+window.addEventListener("pointerup", () => {
+  isDrawing = false;
+});
+
 window.addEventListener("resize", () => {
   buildGrid();
   if (isRunning) {
@@ -142,4 +220,5 @@ window.addEventListener("resize", () => {
   }
 });
 
+currentTick = SPEED_MS[speedSelect.value] ?? SPEED_MS.medium;
 buildGrid();
